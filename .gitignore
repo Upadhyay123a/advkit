@@ -7,3 +7,8 @@ __pycache__/
 .ipynb_checkpoints/
 *.egg-info/
 .DS_Store
+*.txt
+!requirements.txt
+blackbox_result.txt
+repo_structure.txt
+full_diff.txt

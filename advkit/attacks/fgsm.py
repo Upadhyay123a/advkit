@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import torch
-from torch import Tensor, nn
+from torch import Tensor, mean, nn, std
 
 from .base import Attack
 
@@ -32,5 +32,12 @@ class FGSM(Attack):
         adversarial = image + self.epsilon * gradient.sign()
 
         # Keep the result inside the valid normalized-image range so it still looks like an image.
-        adversarial = torch.clamp(adversarial, 0.0, 1.0)
+        #adversarial = torch.clamp(adversarial, 0.0, 1.0)
+        mean = torch.tensor([0.485, 0.456, 0.406], device=image.device).view(1, 3, 1, 1)
+        std = torch.tensor([0.229, 0.224, 0.225], device=image.device).view(1, 3, 1, 1)
+
+        min_val = (0.0 - mean) / std
+        max_val = (1.0 - mean) / std
+
+        adversarial = torch.max(torch.min(adversarial, max_val), min_val)
         return adversarial.detach()
