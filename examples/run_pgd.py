@@ -62,7 +62,7 @@ def main() -> None:
     else:
         print(f"Prediction did not flip within {attack.num_steps} steps")
 
-    output_path = Path("examples/sample_images/adversarial_pgd.jpg")
+    output_path = Path("examples/sample_images/adversarial_pgd.png")
     tensor_to_image(adversarial_tensor.squeeze(0)).save(output_path)
     print(f"Saved adversarial image to {output_path}")
 

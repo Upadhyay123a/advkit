@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from typing import Dict
 
 import torch
@@ -8,17 +9,23 @@ from torch import Tensor, nn
 from advkit.attacks.base import Attack
 from advkit.models.loader import predict
 
+logger = logging.getLogger(__name__)
 
-def perturbation_budget_report(original: Tensor, adversarial: Tensor) -> Dict[str, float]:
+
+def perturbation_budget_report(original: Tensor, adversarial: Tensor, epsilon: float | None = None) -> Dict[str, float]:
     """Compute L2 and L-infinity norms of the perturbation between two tensors."""
     if original.ndim == 4:
         original = original.squeeze(0)
     if adversarial.ndim == 4:
         adversarial = adversarial.squeeze(0)
 
-    delta = original.detach().cpu().float() - adversarial.detach().cpu().float()
+    delta = adversarial.detach().cpu().float() - original.detach().cpu().float()
     l2_norm = torch.linalg.vector_norm(delta.reshape(-1), ord=2).item()
     linf_norm = torch.max(torch.abs(delta)).item()
+
+    if epsilon is not None and linf_norm > epsilon + 1e-4:
+        logger.warning("Perturbation exceeds epsilon budget — check for measurement bug or clamping error")
+
     return {"l2_norm": l2_norm, "linf_norm": linf_norm}
 
 

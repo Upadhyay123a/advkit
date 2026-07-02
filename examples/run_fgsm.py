@@ -27,7 +27,7 @@ def main() -> None:
     print(f"After : class={adversarial_label} confidence={adversarial_confidence:.4f}")
     print(f"Changed: {clean_label != adversarial_label}")
 
-    output_path = Path("examples/sample_images/adversarial.jpg")
+    output_path = Path("examples/sample_images/adversarial.png")
     tensor_to_image(adversarial_tensor.squeeze(0)).save(output_path)
     print(f"Saved adversarial image to {output_path}")
 

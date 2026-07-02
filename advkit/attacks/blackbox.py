@@ -55,11 +55,11 @@ class SimBA(Attack):
                 break
 
             c, h, w = coord
-            original_value = current_image[c, h, w].item()
+            original_value = original[c, h, w].item()
 
             # Try the PLUS direction first. This is a simple, query-efficient test.
             current_image[c, h, w] = original_value + self.epsilon
-            current_image = torch.clamp(current_image, 0.0, 1.0)
+            current_image = torch.clamp(current_image, original - self.epsilon, original + self.epsilon)
 
             with torch.no_grad():
                 logits = model(current_image.unsqueeze(0))
@@ -72,7 +72,7 @@ class SimBA(Attack):
             else:
                 # If PLUS did not help, try the opposite direction.
                 current_image[c, h, w] = original_value - self.epsilon
-                current_image = torch.clamp(current_image, 0.0, 1.0)
+                current_image = torch.clamp(current_image, original - self.epsilon, original + self.epsilon)
 
                 with torch.no_grad():
                     logits = model(current_image.unsqueeze(0))

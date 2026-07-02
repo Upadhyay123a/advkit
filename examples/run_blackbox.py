@@ -38,8 +38,8 @@ def main() -> None:
     result = attack.generate(model, clean_tensor, clean_label)
 
     adversarial_tensor, queries_used = result
+    perturbation = perturbation_budget_report(clean_tensor.squeeze(0), adversarial_tensor.squeeze(0), epsilon=attack.epsilon)
     adversarial_label, adversarial_confidence = predict(model, adversarial_tensor.squeeze(0))
-    perturbation = perturbation_budget_report(clean_tensor.squeeze(0), adversarial_tensor.squeeze(0))
 
     logger.info("Adversarial prediction: class=%s confidence=%.4f", adversarial_label, adversarial_confidence)
     logger.info("Changed: %s", clean_label != adversarial_label)
@@ -47,7 +47,7 @@ def main() -> None:
     logger.info("Perturbation L2: %.4f", perturbation["l2_norm"])
     logger.info("Perturbation L-infinity: %.4f", perturbation["linf_norm"])
 
-    output_path = Path("examples/sample_images/adversarial_blackbox.jpg")
+    output_path = Path("examples/sample_images/adversarial_blackbox.png")
     tensor_to_image(adversarial_tensor.squeeze(0)).save(output_path)
     logger.info("Saved adversarial image to %s", output_path)
 
