@@ -9,6 +9,19 @@ from advkit.attacks.base import Attack
 from advkit.models.loader import predict
 
 
+def perturbation_budget_report(original: Tensor, adversarial: Tensor) -> Dict[str, float]:
+    """Compute L2 and L-infinity norms of the perturbation between two tensors."""
+    if original.ndim == 4:
+        original = original.squeeze(0)
+    if adversarial.ndim == 4:
+        adversarial = adversarial.squeeze(0)
+
+    delta = original.detach().cpu().float() - adversarial.detach().cpu().float()
+    l2_norm = torch.linalg.vector_norm(delta.reshape(-1), ord=2).item()
+    linf_norm = torch.max(torch.abs(delta)).item()
+    return {"l2_norm": l2_norm, "linf_norm": linf_norm}
+
+
 def evaluate_attack(
     model: nn.Module,
     attack: Attack,
@@ -16,13 +29,13 @@ def evaluate_attack(
     true_labels: list[int],
 ) -> Dict[str, float | int]:
     """Evaluate an attack on a batch of images.
-    
+
     Args:
         model: The target model.
         attack: The attack instance with a generate() method.
         image_tensors: List of image tensors to attack.
         true_labels: List of true predicted labels (used as targets for the attack).
-    
+
     Returns:
         A dictionary with:
         - 'total': number of images tested
@@ -38,9 +51,13 @@ def evaluate_attack(
         image_tensor = image_tensor.unsqueeze(0) if image_tensor.ndim == 3 else image_tensor
 
         with torch.no_grad():
-            clean_label, clean_confidence = predict(model, image_tensor.squeeze(0))
+            _, clean_confidence = predict(model, image_tensor.squeeze(0))
 
-        adversarial_tensor = attack.generate(model, image_tensor, true_label)
+        result = attack.generate(model, image_tensor, true_label)
+        if isinstance(result, tuple):
+            adversarial_tensor, _ = result
+        else:
+            adversarial_tensor = result
 
         with torch.no_grad():
             adversarial_label, adversarial_confidence = predict(model, adversarial_tensor.squeeze(0))
