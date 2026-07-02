@@ -61,7 +61,7 @@ def main() -> None:
     )
     print("=" * 85)
     print(
-        "\nSecurity Implications:\n"
+        f"\nSecurity Implications:\n"
         "  • White-box attacks (FGSM, PGD) assume the attacker has full model access\n"
         "    (weights, gradients, architecture). This is the STRONGEST threat model but\n"
         "    rare in practice for large commercial models.\n"
@@ -70,9 +70,9 @@ def main() -> None:
         "    probabilities. This is WEAKER per query but reflects real-world threats\n"
         "    against public ML services (e.g., image classification APIs).\n"
         "\n"
-        "  • Query budget matters: SimBA used ~1000 queries to potentially flip the\n"
-        "    prediction vs FGSM's 1. Rate limits, API costs, and detection algorithms\n"
-        "    make query efficiency critical for real attacks.\n"
+        f"  • Query budget matters: SimBA used {queries_used} queries in this run\n"
+        f"    (budget was {attack.max_queries}). Rate limits, API costs, and detection\n"
+        "    algorithms make query efficiency critical for real attacks.\n"
         "\n"
         "  • Confidence drop trends: White-box attacks often achieve larger drops\n"
         "    because they can compute exact gradients; black-box must search blindly.\n"
