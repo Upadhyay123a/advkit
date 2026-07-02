@@ -34,7 +34,7 @@ def main() -> None:
     logger.info("Target image: %s", image_path.name)
     logger.info("Clean prediction: class=%s confidence=%.4f", clean_label, clean_confidence)
 
-    attack = SimBA(epsilon=0.02, max_queries=5000, early_stop=True)
+    attack = SimBA(epsilon=0.02, max_queries=20, early_stop=True)
     result = attack.generate(model, clean_tensor, clean_label)
 
     adversarial_tensor, queries_used = result
