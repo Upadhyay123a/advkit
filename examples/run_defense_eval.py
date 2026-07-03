@@ -29,11 +29,12 @@ logger = logging.getLogger(__name__)
 
 SAMPLE_DIR = Path("examples/sample_images")
 
-ATTACKS = {
-    "fgsm": lambda: FGSM(epsilon=0.02),
-    "pgd": lambda: PGD(epsilon=0.02, alpha=0.005, num_steps=10),
-    "blackbox": lambda: SimBA(epsilon=0.02, max_queries=1000, early_stop=True),
-}
+def build_attacks(epsilon: float):
+    return {
+        "fgsm": lambda: FGSM(epsilon=epsilon),
+        "pgd": lambda: PGD(epsilon=epsilon, alpha=0.005, num_steps=10),
+        "blackbox": lambda: SimBA(epsilon=epsilon, max_queries=1000, early_stop=True),
+    }
 
 DEFENSES = {
     "bit_depth_4": lambda: BitDepthReduction(bits=4),
@@ -45,6 +46,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Evaluate defenses against attacks.")
     parser.add_argument("--image", type=str, default="sample.jpg")
     parser.add_argument("--model", type=str, default="resnet18")
+    parser.add_argument("--epsilon", type=float, default=0.02, help="Attack perturbation budget")
     args = parser.parse_args()
 
     image_path = SAMPLE_DIR / args.image
@@ -77,7 +79,8 @@ def main() -> None:
 
     results = []
 
-    for attack_name, attack_fn in ATTACKS.items():
+    attacks = build_attacks(args.epsilon)
+    for attack_name, attack_fn in attacks.items():
         attack = attack_fn()
         result = attack.generate(model, clean_tensor, clean_label)
         adversarial_tensor = result[0] if isinstance(result, tuple) else result
